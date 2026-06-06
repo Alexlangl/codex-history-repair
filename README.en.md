@@ -40,13 +40,6 @@ If you already cloned the source code, you can also run it from the project dire
 cargo run -p codex-history-repair -- repair --dry-run
 ```
 
-After a release is available, you can download the CLI archive from GitHub Releases or install it with Homebrew:
-
-```bash
-brew tap Alexlangl/tap
-brew install codex-history-repair
-```
-
 Preview repair changes without writing files:
 
 ```bash

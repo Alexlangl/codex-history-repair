@@ -40,13 +40,6 @@ cargo install --git https://github.com/Alexlangl/codex-history-repair --package 
 cargo run -p codex-history-repair -- repair --dry-run
 ```
 
-发布后也可以从 GitHub Releases 下载对应系统的 CLI 压缩包，或使用 Homebrew 安装：
-
-```bash
-brew tap Alexlangl/tap
-brew install codex-history-repair
-```
-
 只预览修复影响，不写文件：
 
 ```bash
