@@ -106,6 +106,38 @@ Supported JSON formats:
 
 - CPA Codex account JSON.
 - sub2api exports with OpenAI OAuth accounts in `accounts[]`.
+- cockpit Codex account JSON.
+
+CPA / cockpit JSON must include the OpenAI account `access_token` and `id_token`:
+
+```json
+{
+  "type": "codex",
+  "email": "mark@example.com",
+  "access_token": "paste-real-access-token-here",
+  "id_token": "paste-real-id-token-here",
+  "account_id": "00000000-0000-4000-9000-000000000000"
+}
+```
+
+sub2api JSON is read from OpenAI OAuth accounts in `accounts[]`:
+
+```json
+{
+  "accounts": [
+    {
+      "name": "mark@example.com",
+      "platform": "openai",
+      "type": "oauth",
+      "credentials": {
+        "access_token": "paste-real-access-token-here",
+        "id_token": "paste-real-id-token-here",
+        "account_id": "00000000-0000-4000-9000-000000000000"
+      }
+    }
+  ]
+}
+```
 
 Provider import only writes to cc-switch's Codex provider database. It does not switch the active provider, does not modify live Codex config, and does not restart Codex.
 

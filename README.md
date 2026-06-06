@@ -106,6 +106,38 @@ sudo xattr -rd com.apple.quarantine "/Applications/Codex History Repair.app"
 
 - CPA Codex 账号 JSON。
 - sub2api 导出的 `accounts[]` OpenAI OAuth 账号。
+- cockpit 导出的 Codex 账号 JSON。
+
+CPA / cockpit 格式需要包含 OpenAI 账号的 `access_token` 和 `id_token`：
+
+```json
+{
+  "type": "codex",
+  "email": "mark@example.com",
+  "access_token": "paste-real-access-token-here",
+  "id_token": "paste-real-id-token-here",
+  "account_id": "00000000-0000-4000-9000-000000000000"
+}
+```
+
+sub2api 格式会读取 `accounts[]` 里的 OpenAI OAuth 账号：
+
+```json
+{
+  "accounts": [
+    {
+      "name": "mark@example.com",
+      "platform": "openai",
+      "type": "oauth",
+      "credentials": {
+        "access_token": "paste-real-access-token-here",
+        "id_token": "paste-real-id-token-here",
+        "account_id": "00000000-0000-4000-9000-000000000000"
+      }
+    }
+  ]
+}
+```
 
 Provider 导入只写入 cc-switch 的 Codex provider 数据库。它不会自动切换当前 provider，不会修改正在使用的 Codex 配置，也不会重启 Codex。
 
