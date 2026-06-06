@@ -92,6 +92,14 @@ pnpm dev
 - 使用 `Provider 导入` 把 OpenAI 账号 JSON 导入 cc-switch。
 - 使用 `设置` 查看检测到的 cc-switch 和 Codex 路径。
 
+macOS 如果提示 App“已损坏，无法打开”，先把 App 移到 `Applications`，然后执行：
+
+```bash
+sudo xattr -rd com.apple.quarantine "/Applications/Codex History Repair.app"
+```
+
+这是 macOS 对未公证下载 App 的拦截，不是历史修复数据损坏。
+
 ## Provider 导入
 
 支持的 JSON 格式：

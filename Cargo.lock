@@ -415,7 +415,7 @@ checksum = "c8d4a3bb8b1e0c1050499d1815f5ab16d04f0959b233085fb31653fbfc9d98f9"
 
 [[package]]
 name = "codex-history-repair"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "clap",
@@ -425,7 +425,7 @@ dependencies = [
 
 [[package]]
 name = "codex-history-repair-core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "chrono",
  "dirs",
@@ -443,7 +443,7 @@ dependencies = [
 
 [[package]]
 name = "codex-history-repair-ui"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "codex-history-repair-core",
  "serde",

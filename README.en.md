@@ -92,6 +92,14 @@ In the app:
 - Use `Provider 导入` to import OpenAI account JSON into cc-switch.
 - Use `设置` to check detected cc-switch and Codex paths.
 
+If macOS says the app is "damaged" and cannot be opened, move it to `Applications` first, then run:
+
+```bash
+sudo xattr -rd com.apple.quarantine "/Applications/Codex History Repair.app"
+```
+
+This is macOS blocking a downloaded app that has not been notarized. It does not mean your Codex history data is damaged.
+
 ## Provider Import
 
 Supported JSON formats:

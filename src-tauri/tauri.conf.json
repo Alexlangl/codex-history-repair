@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Codex History Repair",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "identifier": "com.alexlangl.codex-history-repair",
   "build": {
     "beforeDevCommand": "pnpm dev:web:ensure",
@@ -27,6 +27,9 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "macOS": {
+      "signingIdentity": "-"
+    },
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
