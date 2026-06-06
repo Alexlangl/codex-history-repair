@@ -28,6 +28,25 @@ It updates local Codex files such as:
 
 ## CLI Usage
 
+Install the CLI first:
+
+```bash
+cargo install --git https://github.com/Alexlangl/codex-history-repair --package codex-history-repair
+```
+
+If you already cloned the source code, you can also run it from the project directory:
+
+```bash
+cargo run -p codex-history-repair -- repair --dry-run
+```
+
+After a release is available, you can download the CLI archive from GitHub Releases or install it with Homebrew:
+
+```bash
+brew tap Alexlangl/tap
+brew install codex-history-repair
+```
+
 Preview repair changes without writing files:
 
 ```bash
