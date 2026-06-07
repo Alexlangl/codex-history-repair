@@ -1,4 +1,9 @@
-export type BusyState = "idle" | "previewing" | "repairing" | "importing";
+export type BusyState =
+  | "idle"
+  | "previewing"
+  | "repairing"
+  | "restarting"
+  | "importing";
 
 export interface Detection {
   ccSwitchDir: string;

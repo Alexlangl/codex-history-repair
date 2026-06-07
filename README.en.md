@@ -31,7 +31,7 @@ It updates local Codex files such as:
 Install the CLI first:
 
 ```bash
-cargo install --git https://github.com/Alexlangl/codex-history-repair --package codex-history-repair
+cargo install --git https://github.com/xf959211192/codex-history-repair --package codex-history-repair
 ```
 
 If you already cloned the source code, you can also run it from the project directory:

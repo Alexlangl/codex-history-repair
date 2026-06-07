@@ -24,15 +24,15 @@ export function ConfirmRepairDialog({
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger asChild>
         <Button disabled={disabled}>
-          {isRepairing ? "修复中..." : "修复并重启 Codex"}
+          {isRepairing ? "修复中..." : "执行修复"}
         </Button>
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="dialog-overlay" />
         <Dialog.Content className="dialog-content">
-          <Dialog.Title>确认修复并重启？</Dialog.Title>
+          <Dialog.Title>确认执行修复？</Dialog.Title>
           <Dialog.Description>
-            会先备份，再写入 Codex 历史文件。Provider 导入不会触发重启。
+            会先备份，再写入 Codex 历史文件。此操作不会重启 Codex。
           </Dialog.Description>
           <div className="actions right">
             <Dialog.Close asChild>

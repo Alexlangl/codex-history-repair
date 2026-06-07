@@ -4,6 +4,7 @@ import type {
   ProviderDraft,
   ProviderImportOutcome,
   RepairOutcome,
+  RestartOutcome,
 } from "../types";
 
 const isTauri = "__TAURI_INTERNALS__" in window;
@@ -30,6 +31,13 @@ export async function repairCodexHistory(args: Record<string, unknown>) {
     throw new Error("请在 Tauri App 中运行修复操作");
   }
   return tauriInvoke<RepairOutcome>("repair_codex_history", args);
+}
+
+export async function restartCodex() {
+  if (!isTauri) {
+    throw new Error("请在 Tauri App 中重启 Codex");
+  }
+  return tauriInvoke<RestartOutcome>("restart_codex_app");
 }
 
 export async function previewProviderImport(args: Record<string, unknown>) {

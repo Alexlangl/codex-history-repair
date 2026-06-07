@@ -13,6 +13,7 @@ import {
   importProvider as importProviderCommand,
   previewProviderImport,
   repairCodexHistory,
+  restartCodex,
 } from "./lib/api";
 import { emptyProviderForm, providerArgs } from "./lib/form";
 import type {
@@ -69,12 +70,26 @@ function App() {
     try {
       const outcome = await repairCodexHistory({
         dryRun,
-        restart: !dryRun,
+        restart: false,
         codexDir,
         targetProviderId,
       });
       setRepair(outcome);
-      setToast(dryRun ? "预览完成" : "修复完成，已请求重启 Codex");
+      setToast(dryRun ? "预览完成" : "修复完成，未重启 Codex");
+    } catch (unknownError) {
+      setError(String(unknownError));
+    } finally {
+      setBusy("idle");
+    }
+  }
+
+  async function runRestart() {
+    setBusy("restarting");
+    setError(null);
+    await nextPaint();
+    try {
+      const outcome = await restartCodex();
+      setToast(outcome.message);
     } catch (unknownError) {
       setError(String(unknownError));
     } finally {
@@ -163,6 +178,7 @@ function App() {
                   targetProviderId={targetProviderId}
                   onCodexDirChange={setCodexDir}
                   onRepair={runRepair}
+                  onRestart={runRestart}
                   onTargetProviderChange={setTargetProviderId}
                 />
               </Tabs.Content>
@@ -199,6 +215,7 @@ function App() {
 function progressValue(busy: BusyState) {
   if (busy === "idle") return 0;
   if (busy === "repairing") return 72;
+  if (busy === "restarting") return 72;
   return 46;
 }
 

@@ -47,6 +47,11 @@ fn repair_codex_history(
 }
 
 #[tauri::command]
+fn restart_codex_app() -> Result<codex_history_repair_core::RestartOutcome, String> {
+    restart_codex().map_err(|error| error.to_string())
+}
+
+#[tauri::command]
 fn preview_provider_import(
     cc_switch_dir: Option<String>,
     provider_id: Option<String>,
@@ -124,6 +129,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             detect_cc_switch,
             repair_codex_history,
+            restart_codex_app,
             preview_provider_import,
             import_provider
         ])

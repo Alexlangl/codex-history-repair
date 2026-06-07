@@ -12,6 +12,7 @@ export function RepairPanel({
   onCodexDirChange,
   onTargetProviderChange,
   onRepair,
+  onRestart,
 }: {
   busy: BusyState;
   codexDir: string;
@@ -20,6 +21,7 @@ export function RepairPanel({
   onCodexDirChange: (value: string) => void;
   onTargetProviderChange: (value: string) => void;
   onRepair: (dryRun: boolean) => void;
+  onRestart: () => void;
 }) {
   return (
     <div className="content-grid">
@@ -51,6 +53,13 @@ export function RepairPanel({
             isRepairing={busy === "repairing"}
             onConfirm={() => onRepair(false)}
           />
+          <Button
+            disabled={busy !== "idle"}
+            onClick={onRestart}
+            variant="secondary"
+          >
+            {busy === "restarting" ? "重启中..." : "重启 Codex"}
+          </Button>
         </div>
       </Panel>
       <ResultPanel lines={repairLines(repair)} title="修复结果" />

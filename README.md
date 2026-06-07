@@ -31,7 +31,7 @@
 先安装 CLI：
 
 ```bash
-cargo install --git https://github.com/Alexlangl/codex-history-repair --package codex-history-repair
+cargo install --git https://github.com/xf959211192/codex-history-repair --package codex-history-repair
 ```
 
 如果已经下载了源码，也可以在项目目录里直接运行：

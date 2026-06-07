@@ -5,8 +5,8 @@ resolver = "2"
 [workspace.package]
 edition = "2021"
 license = "MIT"
-repository = "https://github.com/Alexlangl/codex-history-repair"
-homepage = "https://github.com/Alexlangl/codex-history-repair"
+repository = "https://github.com/xf959211192/codex-history-repair"
+homepage = "https://github.com/xf959211192/codex-history-repair"
 description = "Repair local Codex history after provider switching"
 
 [workspace.dependencies]
@@ -30,7 +30,7 @@ walkdir = "2.5"
 cargo-dist-version = "0.32.0"
 ci = ["github"]
 installers = ["shell", "powershell", "homebrew"]
-tap = "Alexlangl/homebrew-tap"
+tap = "xf959211192/homebrew-tap"
 packages = ["codex-history-repair"]
 targets = [
   "aarch64-apple-darwin",

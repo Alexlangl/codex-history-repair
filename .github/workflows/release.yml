@@ -118,6 +118,8 @@ jobs:
     needs:
       - prepare
       - cli
+    env:
+      HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -126,9 +128,8 @@ jobs:
           merge-multiple: true
 
       - name: Update Homebrew tap
+        if: ${{ env.HOMEBREW_TAP_TOKEN != '' }}
         shell: bash
-        env:
-          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
         run: |
           set -euo pipefail
           VERSION="${{ needs.prepare.outputs.version }}"
@@ -136,15 +137,15 @@ jobs:
           X64_ARCHIVE="${PACKAGE}-${VERSION}-macos-x64.tar.gz"
           ARM_SHA="$(sha256sum "release-assets/${ARM_ARCHIVE}" | awk '{print $1}')"
           X64_SHA="$(sha256sum "release-assets/${X64_ARCHIVE}" | awk '{print $1}')"
-          BASE_URL="https://github.com/Alexlangl/${PACKAGE}/releases/download/v${VERSION}"
+          BASE_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/v${VERSION}"
 
-          git clone "https://x-access-token:${HOMEBREW_TAP_TOKEN}@github.com/Alexlangl/homebrew-tap.git" tap
+          git clone "https://x-access-token:${HOMEBREW_TAP_TOKEN}@github.com/xf959211192/homebrew-tap.git" tap
           mkdir -p tap/Formula
 
           cat > tap/Formula/codex-history-repair.rb <<EOF
           class CodexHistoryRepair < Formula
             desc "Repair local Codex history after provider switching"
-            homepage "https://github.com/Alexlangl/codex-history-repair"
+            homepage "https://github.com/xf959211192/codex-history-repair"
             version "${VERSION}"
             license "MIT"
 
@@ -178,6 +179,10 @@ jobs:
             git commit -m "Update codex-history-repair to ${VERSION}"
             git push
           fi
+
+      - name: Skip Homebrew tap update
+        if: ${{ env.HOMEBREW_TAP_TOKEN == '' }}
+        run: echo "HOMEBREW_TAP_TOKEN is not set; skipping Homebrew tap update."
 
   app:
     name: App ${{ matrix.suffix }}
