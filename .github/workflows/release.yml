@@ -233,7 +233,19 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build Tauri bundle
-        run: pnpm tauri build ${{ matrix.args }}
+        shell: bash
+        run: |
+          for attempt in 1 2 3; do
+            if pnpm tauri build ${{ matrix.args }}; then
+              exit 0
+            fi
+
+            if [[ "${attempt}" == "3" ]]; then
+              exit 1
+            fi
+
+            sleep $((attempt * 20))
+          done
 
       - name: Normalize app release asset names
         env:

@@ -318,7 +318,10 @@ pub fn repair_codex_history(options: RepairOptions) -> Result<RepairOutcome, Rep
         &options.codex_dir,
         &target_provider_id,
     )?);
-    source_provider_ids.retain(|id| is_sync_source_provider_id(id, &target_provider_id));
+    let cc_switch_codex_provider_ids = collect_cc_switch_codex_provider_ids();
+    source_provider_ids.retain(|id| {
+        is_sync_source_provider_id(id, &target_provider_id, &cc_switch_codex_provider_ids)
+    });
 
     let mut backup_root = None;
     let mut migrated_jsonl_files = 0;
@@ -539,9 +542,16 @@ fn collect_state_model_provider_ids(
     Ok(ids)
 }
 
-fn is_sync_source_provider_id(id: &str, target_provider_id: &str) -> bool {
+fn is_sync_source_provider_id(
+    id: &str,
+    target_provider_id: &str,
+    cc_switch_codex_provider_ids: &BTreeSet<String>,
+) -> bool {
     if id == target_provider_id {
         return false;
+    }
+    if cc_switch_codex_provider_ids.contains(id) {
+        return true;
     }
     if id == CODEX_LOCAL_ACCESS_PROVIDER_ID {
         return true;
@@ -561,6 +571,47 @@ fn is_openai_custom_pair(source_provider_id: &str, target_provider_id: &str) -> 
 
 fn is_legacy_provider_id(id: &str) -> bool {
     LEGACY_PROVIDER_IDS.iter().any(|legacy| *legacy == id)
+}
+
+fn collect_cc_switch_codex_provider_ids() -> BTreeSet<String> {
+    let db_path = default_cc_switch_dir().join(CC_SWITCH_DB_FILENAME);
+    if !db_path.exists() {
+        return BTreeSet::new();
+    }
+
+    let Ok(conn) = Connection::open(db_path) else {
+        return BTreeSet::new();
+    };
+    collect_codex_provider_ids_from_conn(&conn).unwrap_or_default()
+}
+
+fn collect_codex_provider_ids_from_conn(
+    conn: &Connection,
+) -> Result<BTreeSet<String>, rusqlite::Error> {
+    let mut ids = BTreeSet::new();
+    let mut stmt =
+        conn.prepare("SELECT id, settings_config FROM providers WHERE app_type = 'codex'")?;
+    let rows = stmt.query_map([], |row| {
+        Ok((
+            row.get::<_, String>(0)?,
+            row.get::<_, String>(1).unwrap_or_default(),
+        ))
+    })?;
+
+    for row in rows {
+        let (id, settings_text) = row?;
+        if let Some(id) = normalize_non_empty(&id) {
+            ids.insert(id);
+        }
+        let settings = serde_json::from_str::<Value>(&settings_text).unwrap_or(Value::Null);
+        if let Some(config_text) = settings.get("config").and_then(Value::as_str) {
+            if let Some(model_provider) = active_model_provider_from_toml(config_text) {
+                ids.insert(model_provider);
+            }
+        }
+    }
+
+    Ok(ids)
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1858,6 +1909,35 @@ mod tests {
             )
             .expect("provider");
         assert_eq!(provider, "custom");
+    }
+
+    #[test]
+    fn syncs_known_cc_switch_provider_buckets() {
+        let dir = tempdir().expect("tempdir");
+        let db_path = dir.path().join(CC_SWITCH_DB_FILENAME);
+        let conn = Connection::open(&db_path).expect("open db");
+        conn.execute_batch(
+            r#"CREATE TABLE providers (
+                id TEXT NOT NULL,
+                app_type TEXT NOT NULL,
+                settings_config TEXT NOT NULL
+            );
+            INSERT INTO providers (id, app_type, settings_config)
+            VALUES
+                ('pptoken', 'codex', '{"config":"model_provider = \"pptoken\""}'),
+                ('my_codex', 'codex', '{"config":"model_provider = \"my_codex\""}'),
+                ('claude_provider', 'claude', '{"config":"model_provider = \"claude_provider\""}');"#,
+        )
+        .expect("schema");
+
+        let known_ids = collect_codex_provider_ids_from_conn(&conn).expect("known ids");
+
+        assert!(known_ids.contains("pptoken"));
+        assert!(known_ids.contains("my_codex"));
+        assert!(!known_ids.contains("claude_provider"));
+        assert!(is_sync_source_provider_id(
+            "pptoken", "my_codex", &known_ids
+        ));
     }
 
     #[test]

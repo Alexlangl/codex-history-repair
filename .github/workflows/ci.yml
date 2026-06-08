@@ -64,4 +64,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build Tauri debug bundle
-        run: pnpm tauri build --debug
+        shell: bash
+        run: |
+          for attempt in 1 2 3; do
+            if pnpm tauri build --debug; then
+              exit 0
+            fi
+
+            if [[ "${attempt}" == "3" ]]; then
+              exit 1
+            fi
+
+            sleep $((attempt * 20))
+          done
