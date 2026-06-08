@@ -17,6 +17,7 @@ use walkdir::WalkDir;
 
 const CODEX_STATE_DB_FILENAME: &str = "state_5.sqlite";
 const CODEX_DEFAULT_MODEL_PROVIDER_ID: &str = "openai";
+const CODEX_LOCAL_ACCESS_PROVIDER_ID: &str = "codex_local_access";
 const CC_SWITCH_DB_FILENAME: &str = "cc-switch.db";
 const DEFAULT_CODEX_MODEL: &str = "gpt-5-codex";
 
@@ -541,6 +542,9 @@ fn collect_state_model_provider_ids(
 fn is_sync_source_provider_id(id: &str, target_provider_id: &str) -> bool {
     if id == target_provider_id {
         return false;
+    }
+    if id == CODEX_LOCAL_ACCESS_PROVIDER_ID {
+        return true;
     }
     if is_openai_custom_pair(id, target_provider_id) {
         return true;
@@ -1794,6 +1798,54 @@ mod tests {
         assert_eq!(outcome.migrated_jsonl_files, 1);
         assert_eq!(outcome.migrated_state_rows, 1);
         assert_eq!(outcome.source_provider_ids, vec!["openai".to_string()]);
+        let session_text = fs::read_to_string(session_path).expect("read jsonl");
+        assert!(session_text.contains("\"model_provider\":\"custom\""));
+
+        let conn = Connection::open(codex_dir.join(CODEX_STATE_DB_FILENAME)).expect("open db");
+        let provider: String = conn
+            .query_row(
+                "SELECT model_provider FROM threads WHERE id = 's1'",
+                [],
+                |row| row.get(0),
+            )
+            .expect("provider");
+        assert_eq!(provider, "custom");
+    }
+
+    #[test]
+    fn syncs_codex_local_access_bucket_when_target_is_custom() {
+        let dir = tempdir().expect("tempdir");
+        let codex_dir = dir.path().join(".codex");
+        let session_dir = codex_dir.join("sessions");
+        fs::create_dir_all(&session_dir).expect("create sessions");
+        let session_path = session_dir.join("rollout.jsonl");
+        fs::write(
+            &session_path,
+            "{\"type\":\"session_meta\",\"payload\":{\"id\":\"s1\",\"model_provider\":\"codex_local_access\"}}\n",
+        )
+        .expect("write jsonl");
+
+        let conn = Connection::open(codex_dir.join(CODEX_STATE_DB_FILENAME)).expect("open db");
+        conn.execute_batch(
+            "CREATE TABLE threads (id TEXT PRIMARY KEY, model_provider TEXT NOT NULL);
+             INSERT INTO threads (id, model_provider) VALUES ('s1', 'codex_local_access');",
+        )
+        .expect("seed db");
+        drop(conn);
+
+        let outcome = repair_codex_history(RepairOptions {
+            codex_dir: codex_dir.clone(),
+            target_provider_id: Some("custom".to_string()),
+            dry_run: false,
+        })
+        .expect("repair");
+
+        assert_eq!(outcome.migrated_jsonl_files, 1);
+        assert_eq!(outcome.migrated_state_rows, 1);
+        assert_eq!(
+            outcome.source_provider_ids,
+            vec!["codex_local_access".to_string()]
+        );
         let session_text = fs::read_to_string(session_path).expect("read jsonl");
         assert!(session_text.contains("\"model_provider\":\"custom\""));
 

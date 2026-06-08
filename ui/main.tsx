@@ -14,6 +14,7 @@ import {
   previewProviderImport,
   repairCodexHistory,
 } from "./lib/api";
+import { noProviderRepairNeeded } from "./lib/format";
 import { emptyProviderForm, providerArgs } from "./lib/form";
 import type {
   BusyState,
@@ -69,12 +70,16 @@ function App() {
     try {
       const outcome = await repairCodexHistory({
         dryRun,
-        restart: !dryRun,
+        restart: false,
         codexDir,
         targetProviderId,
       });
       setRepair(outcome);
-      setToast(dryRun ? "预览完成" : "修复完成，已请求重启 Codex");
+      if (noProviderRepairNeeded(outcome)) {
+        setToast(dryRun ? "无需修复" : "没有发现需要迁移的历史");
+      } else {
+        setToast(dryRun ? "预览完成" : "修复完成，无需重启 Codex");
+      }
     } catch (unknownError) {
       setError(String(unknownError));
     } finally {

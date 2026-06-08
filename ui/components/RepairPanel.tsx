@@ -52,8 +52,34 @@ export function RepairPanel({
             onConfirm={() => onRepair(false)}
           />
         </div>
+        <RepairProgress busy={busy} />
       </Panel>
       <ResultPanel lines={repairLines(repair)} title="修复结果" />
+    </div>
+  );
+}
+
+function RepairProgress({ busy }: { busy: BusyState }) {
+  if (busy !== "previewing" && busy !== "repairing") {
+    return null;
+  }
+
+  const isRepairing = busy === "repairing";
+  const title = isRepairing ? "正在修复历史" : "正在预览影响范围";
+  const note = isRepairing
+    ? "正在备份并写入 Codex 历史，完成后会刷新结果。"
+    : "正在扫描 Codex 历史和状态数据库，完成后会刷新结果。";
+
+  return (
+    <div aria-live="polite" className="repair-progress" role="status">
+      <div className="repair-progress-header">
+        <strong>{title}</strong>
+        <span>{isRepairing ? "Repairing" : "Previewing"}</span>
+      </div>
+      <div aria-hidden="true" className="repair-progress-track">
+        <div className="repair-progress-fill" />
+      </div>
+      <p>{note}</p>
     </div>
   );
 }

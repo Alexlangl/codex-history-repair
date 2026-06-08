@@ -3,6 +3,21 @@ import type { ProviderDraft, ProviderImportOutcome, RepairOutcome } from "../typ
 export function repairLines(repair: RepairOutcome | null) {
   if (!repair) return ["尚未运行"];
 
+  if (noProviderRepairNeeded(repair)) {
+    return [
+      "结论: 无需修复",
+      `当前历史已经在目标 provider (${repair.targetProviderId}) 下。`,
+      repair.dryRun
+        ? "可以不用点击立即修复。"
+        : "没有发现需要迁移的历史。",
+      "",
+      `目标 provider: ${repair.targetProviderId}`,
+      `来源: ${repair.targetProviderSource}`,
+      `Index: ${repair.rebuiltSessionIndexEntries} 条`,
+      repair.dryRun ? "模式: dry-run" : "模式: 已写入",
+    ];
+  }
+
   return [
     `目标 provider: ${repair.targetProviderId}`,
     `来源: ${repair.targetProviderSource}`,
@@ -12,8 +27,17 @@ export function repairLines(repair: RepairOutcome | null) {
     `来源 provider: ${repair.sourceProviderIds.join(", ") || "无"}`,
     repair.backupRoot ? `备份: ${repair.backupRoot}` : "备份: 无写入",
     repair.dryRun ? "模式: dry-run" : "模式: 已写入",
-    repair.restart ? `重启: ${repair.restart.message}` : "重启: 未触发",
+    repair.restart ? `重启: ${repair.restart.message}` : "生效方式: 直接修复，无需重启",
   ];
+}
+
+export function noProviderRepairNeeded(repair: RepairOutcome) {
+  return (
+    repair.migratedJsonlFiles === 0 &&
+    repair.migratedJsonlLines === 0 &&
+    repair.migratedStateRows === 0 &&
+    repair.sourceProviderIds.length === 0
+  );
 }
 
 export function providerPreviewLines(draft: ProviderDraft | null) {

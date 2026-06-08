@@ -46,7 +46,13 @@ Preview repair changes without writing files:
 codex-history-repair repair --dry-run
 ```
 
-Repair history and restart Codex:
+Repair history:
+
+```bash
+codex-history-repair repair
+```
+
+Restarting Codex is usually not required. If you still want to restart after repair:
 
 ```bash
 codex-history-repair repair --restart
@@ -61,8 +67,8 @@ codex-history-repair repair --codex-dir ~/.codex --dry-run
 Repair into an explicit provider bucket:
 
 ```bash
-codex-history-repair repair --target-provider openai --restart
-codex-history-repair repair --target-provider custom --restart
+codex-history-repair repair --target-provider openai
+codex-history-repair repair --target-provider custom
 ```
 
 Preview OpenAI account JSON import:

@@ -46,7 +46,13 @@ cargo run -p codex-history-repair -- repair --dry-run
 codex-history-repair repair --dry-run
 ```
 
-执行修复并重启 Codex：
+执行修复：
+
+```bash
+codex-history-repair repair
+```
+
+通常不需要重启 Codex。如果仍想在修复后重启：
 
 ```bash
 codex-history-repair repair --restart
@@ -61,8 +67,8 @@ codex-history-repair repair --codex-dir ~/.codex --dry-run
 指定要修复到哪个 provider 桶：
 
 ```bash
-codex-history-repair repair --target-provider openai --restart
-codex-history-repair repair --target-provider custom --restart
+codex-history-repair repair --target-provider openai
+codex-history-repair repair --target-provider custom
 ```
 
 预览导入 OpenAI 账号 JSON：

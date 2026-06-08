@@ -21,29 +21,33 @@ fn detect_cc_switch() -> CcSwitchDetection {
 }
 
 #[tauri::command]
-fn repair_codex_history(
+async fn repair_codex_history(
     dry_run: bool,
     restart: bool,
     codex_dir: Option<String>,
     target_provider_id: Option<String>,
 ) -> Result<UiRepairOutcome, String> {
-    let repair = repair_history(RepairOptions {
-        codex_dir: codex_dir
-            .filter(|value| !value.trim().is_empty())
-            .map(PathBuf::from)
-            .unwrap_or_else(resolve_default_codex_dir),
-        target_provider_id,
-        dry_run,
+    tauri::async_runtime::spawn_blocking(move || {
+        let repair = repair_history(RepairOptions {
+            codex_dir: codex_dir
+                .filter(|value| !value.trim().is_empty())
+                .map(PathBuf::from)
+                .unwrap_or_else(resolve_default_codex_dir),
+            target_provider_id,
+            dry_run,
+        })
+        .map_err(|error| error.to_string())?;
+
+        let restart = if restart && !dry_run {
+            Some(restart_codex().map_err(|error| error.to_string())?)
+        } else {
+            None
+        };
+
+        Ok(UiRepairOutcome { repair, restart })
     })
-    .map_err(|error| error.to_string())?;
-
-    let restart = if restart && !dry_run {
-        Some(restart_codex().map_err(|error| error.to_string())?)
-    } else {
-        None
-    };
-
-    Ok(UiRepairOutcome { repair, restart })
+    .await
+    .map_err(|error| error.to_string())?
 }
 
 #[tauri::command]
